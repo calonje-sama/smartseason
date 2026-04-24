@@ -732,7 +732,7 @@
                 <span class="summary-text">Days Since Planting</span>
                 <span class="summary-val">
                   {% if field.planting_date %}
-                    {{ (now.date() - field.planting_date).days if now else '—' }}
+                    {{ (now.date() - field.planting_date).days if now else '0' }}
                   {% else %}—{% endif %}
                 </span>
               </div>
