@@ -47,7 +47,7 @@ https://smartseason-awca.onrender.com/login
 ### 1. 📥 Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone (https://github.com/calonje-sama/smartseason)
 cd smartseason
 ```
 
