@@ -1,12 +1,280 @@
-<form method="POST">
-    <input name="name" placeholder="Name">
-    <input name="email" placeholder="Email">
-    <input name="password" type="password" placeholder="Password">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartSeason · Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid: #2d5a3d;
+      --green-light: #4a8c5c;
+      --green-accent: #6cbf82;
+      --gold: #c9a84c;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --text-dark: #1a1a1a;
+      --text-muted: #6b7c70;
+    }
 
-    <select name="role">
-        <option value="admin">Admin</option>
-        <option value="agent">Agent</option>
-    </select>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    <button type="submit">Register</button>
-</form>
+    body {
+      min-height: 100vh;
+      background: var(--green-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      padding: 40px 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 20% 50%, rgba(106,191,130,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .register-card {
+      background: var(--cream);
+      border-radius: 20px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+
+    .back-link {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--green-light); }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 36px;
+      padding-top: 16px;
+    }
+
+    .card-header .icon {
+      width: 56px;
+      height: 56px;
+      background: var(--green-deep);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 16px;
+    }
+
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .card-header p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.93rem;
+      background: #fff;
+      color: var(--text-dark);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+    }
+
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7c70' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(74,140,92,0.12);
+    }
+
+    .role-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .role-card {
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      background: #fff;
+    }
+
+    .role-card input[type="radio"] { display: none; }
+
+    .role-card .role-icon { font-size: 22px; margin-bottom: 4px; }
+    .role-card .role-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+    .role-card .role-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .role-card:has(input:checked) {
+      border-color: var(--green-light);
+      background: rgba(74,140,92,0.06);
+      box-shadow: 0 0 0 3px rgba(74,140,92,0.1);
+    }
+
+    .btn-register {
+      width: 100%;
+      padding: 15px;
+      background: var(--green-deep);
+      color: var(--cream);
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn-register:hover {
+      background: var(--green-mid);
+      box-shadow: 0 4px 20px rgba(26,58,42,0.3);
+      transform: translateY(-1px);
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .login-link a {
+      color: var(--green-light);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--cream-dark);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="register-card">
+    <a href="/login" class="back-link">← Back to Login</a>
+
+    <div class="card-header">
+      <div class="icon">🌾</div>
+      <h2>Create Account</h2>
+      <p>Join SmartSeason to manage your fields</p>
+    </div>
+
+    <form method="POST">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input name="name" placeholder="e.g. James Kimani" required>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input name="email" type="email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input name="password" type="password" placeholder="Create a strong password" required>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label>Account Role</label>
+        <div class="role-cards">
+          <label class="role-card">
+            <input type="radio" name="role" value="admin" checked>
+            <div class="role-icon">👨‍💼</div>
+            <div class="role-name">Admin</div>
+            <div class="role-desc">Manage all fields & agents</div>
+          </label>
+          <label class="role-card">
+            <input type="radio" name="role" value="agent">
+            <div class="role-icon">🧑‍🌾</div>
+            <div class="role-name">Field Agent</div>
+            <div class="role-desc">Update assigned fields</div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-register">Create Account →</button>
+    </form>
+
+    <div class="login-link">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </div>
+
+</body>
+</html>

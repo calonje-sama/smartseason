@@ -1,14 +1,349 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8">
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartSeason · Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid: #2d5a3d;
+      --green-light: #4a8c5c;
+      --green-accent: #6cbf82;
+      --gold: #c9a84c;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --text-dark: #1a1a1a;
+      --text-muted: #6b7c70;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--green-deep);
+      overflow: hidden;
+    }
+
+    /* Left panel - decorative */
+    .panel-left {
+      width: 55%;
+      position: relative;
+      background: var(--green-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .panel-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 30% 70%, rgba(106,191,130,0.2) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.15) 0%, transparent 50%);
+    }
+
+    /* Decorative geometric crop-field lines */
+    .field-lines {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .field-lines svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.12;
+    }
+
+    .panel-left-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .brand-logo {
+      width: 64px;
+      height: 64px;
+      background: var(--gold);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 28px;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.3);
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: var(--cream);
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .brand-tagline {
+      color: var(--green-accent);
+      font-size: 0.95rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      margin-top: 60px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--gold);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(245,240,232,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-top: 4px;
+    }
+
+    /* Right panel - form */
+    .panel-right {
+      width: 45%;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-header {
+      margin-bottom: 40px;
+    }
+
+    .login-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text-dark);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(74,140,92,0.12);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      background: var(--green-deep);
+      color: var(--cream);
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      background: var(--green-mid);
+      box-shadow: 0 4px 20px rgba(26,58,42,0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-login:active { transform: translateY(0); }
+
+    .flash-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .login-footer a {
+      color: var(--green-light);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-footer a:hover { text-decoration: underline; }
+
+    /* Animated field rows in background */
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(-20px); }
+    }
+
+    .leaf-deco {
+      position: absolute;
+      font-size: 80px;
+      opacity: 0.06;
+      animation: drift 6s ease-in-out infinite alternate;
+    }
+
+    .leaf-deco:nth-child(1) { top: 10%; left: 15%; animation-delay: 0s; }
+    .leaf-deco:nth-child(2) { top: 60%; left: 70%; animation-delay: 2s; font-size: 120px; }
+    .leaf-deco:nth-child(3) { top: 30%; left: 55%; animation-delay: 4s; font-size: 50px; }
+
+    @media (max-width: 768px) {
+      .panel-left { display: none; }
+      .panel-right { width: 100%; }
+    }
+  </style>
 </head>
 <body>
-    <form method="POST">
-        <input name="email" placeholder="Email">
-        <input name="password" type="password" placeholder="Password">
-        <button type="submit">Login</button>
-    </form>
+
+  <div class="panel-left">
+    <div class="field-lines">
+      <div class="leaf-deco">🌿</div>
+      <div class="leaf-deco">🌱</div>
+      <div class="leaf-deco">🍃</div>
+      <svg viewBox="0 0 600 700" preserveAspectRatio="xMidYMid slice">
+        <!-- Crop field perspective lines -->
+        <g stroke="white" stroke-width="1" fill="none">
+          <line x1="300" y1="0" x2="0" y2="700"/>
+          <line x1="300" y1="0" x2="100" y2="700"/>
+          <line x1="300" y1="0" x2="200" y2="700"/>
+          <line x1="300" y1="0" x2="300" y2="700"/>
+          <line x1="300" y1="0" x2="400" y2="700"/>
+          <line x1="300" y1="0" x2="500" y2="700"/>
+          <line x1="300" y1="0" x2="600" y2="700"/>
+          <!-- Horizontal rows -->
+          <line x1="0" y1="200" x2="600" y2="200"/>
+          <line x1="0" y1="300" x2="600" y2="300"/>
+          <line x1="0" y1="400" x2="600" y2="400"/>
+          <line x1="0" y1="500" x2="600" y2="500"/>
+          <line x1="0" y1="600" x2="600" y2="600"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="panel-left-content">
+      <div class="brand-logo">🌾</div>
+      <div class="brand-name">SmartSeason</div>
+      <div class="brand-tagline">Field Intelligence Platform</div>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">Yield Rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">24/7</div>
+          <div class="stat-label">Monitoring</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100+</div>
+          <div class="stat-label">Fields Tracked</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="login-box">
+      <div class="login-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your SmartSeason account</p>
+      </div>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div class="flash-error">⚠ {{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input name="password" type="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-login">Sign In →</button>
+      </form>
+
+      <div class="login-footer">
+        Don't have an account? <a href="/register">Register here</a>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
