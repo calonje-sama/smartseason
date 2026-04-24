@@ -77,5 +77,6 @@ def field_history(field_id):
     return render_template(
         "field_history.html",
         field=field,
-        history=history
+        history=history, 
+        now=datetime.now()
     )

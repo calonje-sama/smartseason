@@ -40,6 +40,89 @@ https://smartseason-awca.onrender.com/login
 
 ---
 
+## ⚙️ Setup Instructions
+
+---
+
+### 1. 📥 Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd smartseason
+```
+
+---
+
+### 2. 🐍 Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Activate it:
+
+**Windows**
+```bash
+venv\Scripts\activate
+```
+
+**Mac/Linux**
+```bash
+source venv/bin/activate
+```
+
+---
+
+### 3. 📦 Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 4. 🔧 Configure Environment Variables
+
+> If using PostgreSQL or environment config:
+
+**Mac/Linux**
+```bash
+export FLASK_APP=app.py
+export FLASK_ENV=development
+```
+
+**Windows (PowerShell)**
+```powershell
+set FLASK_APP=app.py
+set FLASK_ENV=development
+```
+
+---
+
+### 5. 🗄️ Run Database Migrations / Setup
+
+> If using SQLAlchemy only:
+
+```bash
+python app.py
+```
+
+The app will automatically:
+- Create database tables
+- Seed initial admin, agent, and demo field *(if database is empty)*
+
+---
+
+### 6. 🚀 Run the Application
+
+```bash
+python app.py
+```
+
+Then open (or link given in your terminal for different ports):
+
+👉 `http://127.0.0.1:5000`
+
 ## 📦 Features
 
 ### 👤 Authentication & Roles
