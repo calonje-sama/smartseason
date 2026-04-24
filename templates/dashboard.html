@@ -519,9 +519,15 @@
     /* Agent update form inline */
     .update-form {
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 8px;
       flex: 1;
+    }
+
+    .update-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
     .update-form select {
@@ -590,6 +596,15 @@
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .content { padding: 20px 16px; }
       .topbar { padding: 16px; }
+    }
+    #notes {
+      width: 100%;
+      min-height: 38px;
+      resize: vertical;
+      padding: 7px 10px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 7px;
+      font-size: 0.8rem;
     }
   </style>
 </head>
@@ -714,6 +729,16 @@
                   <div class="meta-val">🌱 {{ f.crop_type }}</div>
                 </div>
                 <div class="meta-item">
+                  <div class="meta-key">Assigned Agent</div>
+                  <div class="meta-val">
+                    {% if f.agent %}
+                      👤 {{ f.agent.name }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="meta-item">
                   <div class="meta-key">Stage</div>
                   <div class="meta-val">{{ f.stage }}</div>
                 </div>
@@ -725,7 +750,7 @@
                   <div class="meta-key">Days Active</div>
                   <div class="meta-val">
                     {% if f.planting_date %}
-                      {{ (now.date() - f.planting_date).days if now else '—' }} days
+                      {{ (now.date() - f.planting_date).days if now else '0' }} days
                     {% else %}—{% endif %}
                   </div>
                 </div>
@@ -749,12 +774,17 @@
 
               {% if user.role == 'agent' %}
               <form method="POST" action="/fields/update/{{ f.id }}" class="update-form">
-                <select name="stage">
-                  {% for s in stages %}
-                    <option value="{{ s }}" {% if f.stage == s %}selected{% endif %}>{{ s }}</option>
-                  {% endfor %}
-                </select>
-                <button type="submit" class="btn-update">Update</button>
+                <textarea name="note" placeholder="Add note..." id="notes"></textarea>
+                <div class="update-row">
+                  
+                  <select name="stage">
+                    {% for s in stages %}
+                      <option value="{{ s }}" {% if f.stage == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <button type="submit" class="btn-update">Update</button>
+                </div>
               </form>
               {% endif %}
             </div>

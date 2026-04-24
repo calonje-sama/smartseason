@@ -5,6 +5,8 @@ from routes.auth import auth
 from models.user import User
 from models.field import Field
 from routes.field import field_bp
+from seed_data import seed_database
+from datetime import datetime
 
 
 def create_app():
@@ -17,6 +19,12 @@ def create_app():
     app.register_blueprint(auth)
     app.register_blueprint(field_bp)
 
+    with app.app_context():
+        db.create_all()
+
+        if not User.query.first():
+            seed_database()
+
     return app
 
 app = create_app()
@@ -27,7 +35,6 @@ from flask_login import login_required, current_user
 @app.route('/dashboard')
 @login_required
 def dashboard():
-
     if current_user.role == "admin":
         fields = Field.query.all()
     else:
@@ -53,8 +60,10 @@ def dashboard():
         total=total,
         active=active,
         risk=risk,
-        done=done
+        done=done, 
+        now=datetime.now()
     )
 
 if __name__ == "__main__":
     app.run()
+    

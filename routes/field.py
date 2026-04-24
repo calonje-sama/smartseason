@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, render_template, request, redirect, abort
+from utils.decorators import role_required, owner_or_admin_required
 from flask_login import login_required, current_user
 
 from extensions import db
@@ -11,14 +12,9 @@ field_bp = Blueprint('field', __name__)
 
 @field_bp.route('/fields/create', methods=['GET', 'POST'])
 @login_required
-def create_field():
-    
-
-    if current_user.role != 'admin':
-        return "Unauthorized", 403
-
+@role_required('admin')
+def create_field():    
     agents = User.query.filter_by(role='agent').all()
-    print(agents)
 
     if request.method == 'POST':
         field = Field(
@@ -39,15 +35,11 @@ def create_field():
 
 @field_bp.route('/fields/update/<int:field_id>', methods=['GET', 'POST'])
 @login_required
+@role_required('agent')
+@owner_or_admin_required(lambda field_id: Field.query.get_or_404(field_id))
 def update_field(field_id):
 
     field = Field.query.get_or_404(field_id)
-
-    if current_user.role != "agent":
-        return "Unauthorized", 403
-
-    if field.assigned_agent_id != current_user.id:
-        return "Not your field", 403
 
     if request.method == "POST":
         old_stage = field.stage
@@ -58,7 +50,8 @@ def update_field(field_id):
             field_id=field.id,
             updated_by=current_user.id,
             old_stage=old_stage,
-            new_stage=new_stage
+            new_stage=new_stage,
+            note=request.form.get('note')
         )
 
         db.session.add(history)
@@ -74,6 +67,9 @@ from models.field_history import FieldHistory
 def field_history(field_id):
 
     field = Field.query.get_or_404(field_id)
+
+    if current_user.role == "agent" and field.assigned_agent_id != current_user.id:
+        abort(403)
 
     history = FieldHistory.query.filter_by(field_id=field_id)\
         .order_by(FieldHistory.timestamp.desc()).all()

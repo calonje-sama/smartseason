@@ -1,20 +1,756 @@
-<h2>Field History - {{ field.name }}</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartSeason · Field History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid: #2d5a3d;
+      --green-light: #4a8c5c;
+      --green-accent: #6cbf82;
+      --gold: #c9a84c;
+      --gold-light: #e8d08a;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --bg: #f0ece2;
+      --text-dark: #1a1a1a;
+      --text-muted: #6b7c70;
+      --sidebar-w: 240px;
+      --status-active: #16a34a;
+      --status-risk: #d97706;
+      --status-done: #2563eb;
+    }
 
-<p>Crop: {{ field.crop_type }}</p>
-<p>Current Stage: {{ field.stage }}</p>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-<hr>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+    }
 
-<h3>Change History</h3>
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--green-deep);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
 
-{% for h in history %}
-    <div style="border:1px solid #ddd; padding:10px; margin-bottom:8px;">
-        <b>{{ h.old_stage }}</b> → <b>{{ h.new_stage }}</b><br>
-        Updated By: {{ h.user.name }} ({{ h.user.role }}) <br>
-        Time: {{ h.timestamp }}
+    .sidebar-brand {
+      padding: 28px 24px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-brand .logo-row { display: flex; align-items: center; gap: 10px; }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--gold);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+
+    .brand-text { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--cream); line-height: 1.1; }
+    .brand-sub { font-size: 0.68rem; color: rgba(245,240,232,0.45); font-weight: 300; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+    .sidebar-user { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+    .user-avatar {
+      width: 40px; height: 40px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-bottom: 10px;
+      color: white; font-weight: 600;
+    }
+
+    .user-name { color: var(--cream); font-size: 0.9rem; font-weight: 500; }
+
+    .user-role-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .badge-admin { background: rgba(201,168,76,0.2); color: var(--gold-light); }
+    .badge-agent { background: rgba(106,191,130,0.2); color: var(--green-accent); }
+
+    .sidebar-nav { padding: 16px 12px; flex: 1; }
+
+    .nav-label {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: rgba(245,240,232,0.3); font-weight: 500; padding: 0 12px; margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      color: rgba(245,240,232,0.65); text-decoration: none;
+      font-size: 0.88rem; font-weight: 400;
+      transition: all 0.15s; margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--cream); }
+    .nav-item.active { background: rgba(106,191,130,0.15); color: var(--green-accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px 12px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .btn-logout {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      color: rgba(245,240,232,0.5); text-decoration: none;
+      font-size: 0.88rem; transition: all 0.15s;
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .btn-logout:hover { background: rgba(220,50,50,0.12); color: #fca5a5; }
+
+    /* ===== MAIN ===== */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .topbar {
+      background: var(--cream);
+      border-bottom: 1px solid var(--cream-dark);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 8px; background: white;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      font-weight: 500; color: var(--text-muted); text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .btn-back:hover { border-color: var(--green-light); color: var(--green-light); }
+
+    .topbar-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--green-deep); }
+    .topbar-subtitle { font-size: 0.82rem; color: var(--text-muted); margin-top: 1px; }
+
+    .content { padding: 32px; flex: 1; }
+
+    /* ===== FIELD SUMMARY BANNER ===== */
+    .field-banner {
+      background: var(--green-deep);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .field-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(106,191,130,0.15) 0%, transparent 60%);
+    }
+
+    .banner-left { position: relative; z-index: 1; }
+
+    .banner-crop-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,240,232,0.12);
+      color: rgba(245,240,232,0.75);
+      font-size: 0.75rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 10px; border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .banner-field-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .banner-meta {
+      display: flex; align-items: center; gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .banner-meta-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem;
+      color: rgba(245,240,232,0.65);
+    }
+
+    .banner-meta-item strong { color: var(--cream); }
+
+    .banner-right {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .stage-badge-large {
+      background: rgba(245,240,232,0.12);
+      border: 1px solid rgba(245,240,232,0.2);
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    .stage-badge-label {
+      font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 1px; color: rgba(245,240,232,0.5);
+      margin-bottom: 4px;
+    }
+
+    .stage-badge-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; color: var(--cream);
+    }
+
+    .status-badge-large {
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    .status-badge-large.active { background: rgba(22,163,74,0.2); border: 1px solid rgba(22,163,74,0.3); }
+    .status-badge-large.risk { background: rgba(217,119,6,0.2); border: 1px solid rgba(217,119,6,0.3); }
+    .status-badge-large.completed { background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.3); }
+
+    .status-badge-large .stage-badge-label { color: rgba(245,240,232,0.5); }
+
+    .status-badge-large.active .stage-badge-value { color: #86efac; }
+    .status-badge-large.risk .stage-badge-value { color: #fde68a; }
+    .status-badge-large.completed .stage-badge-value { color: #93c5fd; }
+
+    /* ===== STAGE PROGRESS ===== */
+    .stage-progress-card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--cream-dark);
+      padding: 22px 28px;
+      margin-bottom: 24px;
+    }
+
+    .progress-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted);
+      font-weight: 600; margin-bottom: 16px;
+    }
+
+    .stage-steps {
+      display: flex;
+      align-items: center;
+    }
+
+    .stage-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+
+    .stage-step::before {
+      content: '';
+      position: absolute;
+      top: 16px; left: 50%; right: -50%;
+      height: 2px; background: var(--cream-dark); z-index: 0;
+    }
+
+    .stage-step:last-child::before { display: none; }
+
+    .stage-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--cream-dark);
+      margin: 0 auto 6px;
+      position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .stage-step.done .stage-dot { background: var(--green-light); color: white; }
+    .stage-step.current .stage-dot { background: var(--green-deep); color: white; box-shadow: 0 0 0 4px rgba(26,58,42,0.15); }
+    .stage-step.done::before { background: var(--green-light); }
+
+    .stage-text { font-size: 0.72rem; color: var(--text-muted); }
+    .stage-step.current .stage-text { color: var(--green-deep); font-weight: 600; }
+    .stage-step.done .stage-text { color: var(--green-light); }
+
+    /* ===== LAYOUT: HISTORY + CHART ===== */
+    .history-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    /* ===== TIMELINE ===== */
+    .history-card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--cream-dark);
+      overflow: hidden;
+    }
+
+    .history-card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .history-card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; color: var(--text-dark);
+    }
+
+    .count-badge {
+      background: var(--green-deep); color: var(--cream);
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 500;
+    }
+
+    .timeline { padding: 8px 0; }
+
+    .timeline-item {
+      display: flex;
+      gap: 0;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    .timeline-left {
+      width: 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .timeline-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 2px solid var(--cream-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      margin-top: 16px;
+      position: relative; z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .timeline-dot.first { background: var(--green-deep); border-color: var(--green-deep); }
+
+    .timeline-line {
+      width: 2px;
+      background: var(--cream-dark);
+      flex: 1;
+      min-height: 20px;
+    }
+
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .timeline-content {
+      flex: 1;
+      padding: 16px 0 16px 16px;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+
+    .timeline-item:last-child .timeline-content { border-bottom: none; }
+
+    .transition-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .stage-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 11px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 500;
+    }
+
+    .stage-chip.planted { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .stage-chip.growing { background: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
+    .stage-chip.ready { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .stage-chip.harvested { background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
+
+    .arrow-icon { color: var(--text-muted); font-size: 14px; }
+
+    .timeline-meta {
+      display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; color: var(--text-muted);
+    }
+
+    .agent-mini-avatar {
+      width: 20px; height: 20px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 9px; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Empty state */
+    .empty-timeline {
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .empty-icon { font-size: 40px; margin-bottom: 14px; }
+
+    .empty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; color: var(--text-dark); margin-bottom: 6px;
+    }
+
+    .empty-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ===== SIDE CHART PANEL ===== */
+    .side-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    .chart-card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--cream-dark);
+      padding: 22px;
+    }
+
+    .chart-card-title {
+      font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600; color: var(--text-muted);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 7px;
+    }
+
+    /* Stage bar chart */
+    .stage-bars { display: flex; flex-direction: column; gap: 12px; }
+
+    .bar-row { }
+
+    .bar-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .bar-name { font-size: 0.82rem; font-weight: 500; color: var(--text-dark); }
+    .bar-count { font-size: 0.78rem; color: var(--text-muted); }
+
+    .bar-track {
+      height: 8px; background: var(--cream-dark);
+      border-radius: 4px; overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.8s ease;
+    }
+
+    .bar-fill.planted { background: #22c55e; }
+    .bar-fill.growing { background: #eab308; }
+    .bar-fill.ready { background: #3b82f6; }
+    .bar-fill.harvested { background: #8b5cf6; }
+
+    /* Activity summary */
+    .summary-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .summary-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px;
+      background: #fafaf8;
+      border-radius: 8px;
+      border: 1px solid var(--cream-dark);
+    }
+
+    .summary-icon { font-size: 18px; flex-shrink: 0; }
+    .summary-text { flex: 1; font-size: 0.82rem; color: var(--text-dark); }
+    .summary-val { font-size: 0.88rem; font-weight: 600; color: var(--green-deep); }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .history-layout { grid-template-columns: 1fr; }
+      .side-panel { display: grid; grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 16px; }
+      .field-banner { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .banner-right { flex-wrap: wrap; }
+      .side-panel { grid-template-columns: 1fr; }
+    }
+    .timeline-note {
+      margin: 6px 0 10px;
+      padding: 8px 12px;
+      background: #f8faf9;
+      border-left: 3px solid var(--green-light);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      color: var(--text-dark);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-row">
+        <div class="logo-icon">🌾</div>
+        <div>
+          <div class="brand-text">SmartSeason</div>
+          <div class="brand-sub">Field Intelligence</div>
+        </div>
+      </div>
     </div>
-{% endfor %}
 
-{% if history|length == 0 %}
-    <p>No history available yet.</p>
-{% endif %}
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ current_user.name[0] | upper }}</div>
+      <div class="user-name">{{ current_user.name }}</div>
+      <span class="user-role-badge {% if current_user.role == 'admin' %}badge-admin{% else %}badge-agent{% endif %}">
+        {{ current_user.role | capitalize }}
+      </span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Navigation</div>
+      <a href="/dashboard" class="nav-item">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      {% if current_user.role == 'admin' %}
+      <a href="/fields/create" class="nav-item">
+        <span class="nav-icon">➕</span> Create Field
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/logout" class="btn-logout">
+        <span>🚪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <a href="/dashboard" class="btn-back">← Back to Dashboard</a>
+        <div>
+          <div class="topbar-title">Field History</div>
+          <div class="topbar-subtitle">Stage change log for {{ field.name }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- FIELD BANNER -->
+      <div class="field-banner">
+        <div class="banner-left">
+          <div class="banner-crop-tag">🌱 {{ field.crop_type }}</div>
+          <div class="banner-field-name">{{ field.name }}</div>
+          <div class="banner-meta">
+            <div class="banner-meta-item">
+              📅 Planted <strong>{{ field.planting_date.strftime('%d %b %Y') if field.planting_date else '—' }}</strong>
+            </div>
+            <div class="banner-meta-item">
+              📋 <strong>{{ history | length }}</strong> update{{ 's' if history | length != 1 else '' }} recorded
+            </div>
+          </div>
+        </div>
+        <div class="banner-right">
+          <div class="stage-badge-large">
+            <div class="stage-badge-label">Current Stage</div>
+            <div class="stage-badge-value">{{ field.stage }}</div>
+          </div>
+          {% set computed_status = field.compute_status() %}
+          <div class="status-badge-large {{ computed_status.lower().replace(' ', '-').replace('at-risk', 'risk') }}">
+            <div class="stage-badge-label">Status</div>
+            <div class="stage-badge-value">{{ computed_status }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGE PROGRESS BAR -->
+      {% set stages = ['Planted', 'Growing', 'Ready', 'Harvested'] %}
+      {% set stage_idx = stages.index(field.stage) if field.stage in stages else 0 %}
+      <div class="stage-progress-card">
+        <div class="progress-label">Growth Progress</div>
+        <div class="stage-steps">
+          {% for s in stages %}
+          <div class="stage-step {% if loop.index0 < stage_idx %}done{% elif loop.index0 == stage_idx %}current{% endif %}">
+            <div class="stage-dot">
+              {% if loop.index0 < stage_idx %}✓
+              {% elif loop.index0 == stage_idx %}●
+              {% endif %}
+            </div>
+            <div class="stage-text">{{ s }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- HISTORY + SIDE PANEL -->
+      <div class="history-layout">
+
+        <!-- TIMELINE -->
+        <div class="history-card">
+          <div class="history-card-header">
+            <div class="history-card-title">Change Timeline</div>
+            <span class="count-badge">{{ history | length }} entries</span>
+          </div>
+
+          {% if history %}
+          <div class="timeline">
+            {% for h in history %}
+            <div class="timeline-item">
+              <div class="timeline-left">
+                <div class="timeline-dot {% if loop.first %}first{% endif %}">
+                  {% if loop.first %}🔄{% else %}📌{% endif %}
+                </div>
+                <div class="timeline-line"></div>
+              </div>
+              <div class="timeline-content">
+                <div class="transition-row">
+                  <span class="stage-chip {{ h.old_stage.lower() }}">{{ h.old_stage }}</span>
+                  <span class="arrow-icon">→</span>
+                  <span class="stage-chip {{ h.new_stage.lower() }}">{{ h.new_stage }}</span>
+                </div>
+                {% if h.note %}
+                  <div class="timeline-note">
+                    📝 {{ h.note }}
+                  </div>
+                {% else %}
+                  <div class="timeline-note" style="opacity:0.6; font-style:italic;">
+                    No note provided
+                  </div>
+                {% endif %}
+                <div class="timeline-meta">
+                  <div class="meta-tag">
+                    <div class="agent-mini-avatar">{{ h.user.name[0] | upper }}</div>
+                    <span>{{ h.user.name }}</span>
+                    <span style="opacity:0.5">·</span>
+                    <span>{{ h.user.role | capitalize }}</span>
+                  </div>
+                  <div class="meta-tag">
+                    🕐 {{ h.timestamp.strftime('%d %b %Y, %H:%M') if h.timestamp else '—' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% else %}
+          <div class="empty-timeline">
+            <div class="empty-icon">📋</div>
+            <div class="empty-title">No changes recorded yet</div>
+            <div class="empty-desc">Stage updates by assigned agents will appear here.</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- SIDE CHARTS & SUMMARY -->
+        <div class="side-panel">
+
+          <!-- Stage frequency chart -->
+          <div class="chart-card">
+            <div class="chart-card-title">📊 Stage Transitions</div>
+            {% set stage_counts = {'Planted': 0, 'Growing': 0, 'Ready': 0, 'Harvested': 0} %}
+            {% for h in history %}
+              {% if h.new_stage in stage_counts %}
+                {% set _ = stage_counts.update({h.new_stage: stage_counts[h.new_stage] + 1}) %}
+              {% endif %}
+            {% endfor %}
+            {% set max_count = [stage_counts.values() | list | max, 1] | max %}
+            <div class="stage-bars">
+              {% for stage_name, color_class in [('Planted','planted'),('Growing','growing'),('Ready','ready'),('Harvested','harvested')] %}
+              {% set cnt = stage_counts[stage_name] %}
+              <div class="bar-row">
+                <div class="bar-header">
+                  <span class="bar-name">{{ stage_name }}</span>
+                  <span class="bar-count">{{ cnt }}x</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill {{ color_class }}" style="width: {{ (cnt / max_count * 100) | int }}%"></div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Activity summary -->
+          <div class="chart-card">
+            <div class="chart-card-title">⚡ Activity Summary</div>
+            <div class="summary-list">
+              <div class="summary-item">
+                <span class="summary-icon">📝</span>
+                <span class="summary-text">Total Updates</span>
+                <span class="summary-val">{{ history | length }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-icon">👥</span>
+                <span class="summary-text">Agents Involved</span>
+                <span class="summary-val">{{ history | map(attribute='user.name') | list | unique | list | length }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-icon">📅</span>
+                <span class="summary-text">Days Since Planting</span>
+                <span class="summary-val">
+                  {% if field.planting_date %}
+                    {{ (now.date() - field.planting_date).days if now else '—' }}
+                  {% else %}—{% endif %}
+                </span>
+              </div>
+              {% if history %}
+              <div class="summary-item">
+                <span class="summary-icon">🕐</span>
+                <span class="summary-text">Last Updated</span>
+                <span class="summary-val">{{ history[0].timestamp.strftime('%d %b') if history[0].timestamp else '—' }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</body>
+</html>
