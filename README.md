@@ -6,7 +6,7 @@ Built as a technical assessment to demonstrate backend logic, role-based access 
 ---
 
 ## 🚀 Live Demo
-https://<your-render-link>.onrender.com
+https://smartseason-awca.onrender.com/login
 
 ---
 
