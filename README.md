@@ -102,60 +102,129 @@ def compute_status(self):
         return "At Risk"
 
     return "Active"
-Status Definitions:
-Active → Normal progression
-At Risk → No progress for 14+ days in early stages
-Completed → Field has been harvested
-📋 Field History
-Every stage update is logged
-Tracks:
-Previous stage
-New stage
-Updated by (agent)
-Timestamp
-📊 Dashboard
-Admin Dashboard:
-Total fields
-Active fields
-At risk fields
-Completed fields
-Full visibility across all agents
-Agent Dashboard:
-Only assigned fields
-Ability to update stage
-View field history
-🔐 Security & Access Control
-Flask-Login session authentication
-Role-based access enforcement
-Route protection using decorators:
-role_required(role)
-owner_or_admin_required()
+```
+## 📌 Status Definitions
 
-Prevents:
+- **Active** → Normal progression  
+- **At Risk** → No progress for 14+ days in early stages  
+- **Completed** → Field has been harvested  
 
-Agents accessing admin routes
-Unauthorized field modifications
-Cross-agent field updates
-🧠 Design Decisions
-Used Jinja templates for simplicity and speed (no frontend framework overhead)
-Separated concerns using:
-Blueprints (auth, fields)
-Models (User, Field, FieldHistory)
-Computed business logic (status) instead of storing static values
-Lightweight architecture to meet assessment scope without over-engineering
-🗄️ Database Design
-Users
-id
-name
-email
-password
-role
-Fields
-id
-name
-crop_type
-planting_date
-stage
-status (computed)
-assigned_agent_id
-FieldHistory
+---
+
+## 📋 Field History
+
+Every stage update is logged and stored for audit and tracking purposes.
+
+### Tracked Data Includes:
+- Previous stage  
+- New stage  
+- Updated by (agent/admin)  
+- Timestamp  
+
+---
+
+## 📊 Dashboard Overview
+
+### 🧑‍💼 Admin Dashboard
+- Total fields  
+- Active fields  
+- At-risk fields  
+- Completed fields  
+- Full visibility across all agents  
+
+### 👨‍🌾 Agent Dashboard
+- Only assigned fields  
+- Ability to update field stage  
+- View field history  
+
+---
+
+## 🔐 Security & Access Control
+
+The system uses secure authentication and role-based access control:
+
+### Features:
+- Flask-Login session authentication  
+- Role-based access enforcement  
+- Route protection via decorators  
+
+### Security Decorators:
+- `role_required(role)`  
+- `owner_or_admin_required()`  
+
+### Prevents:
+- Agents accessing admin routes  
+- Unauthorized field modifications  
+- Cross-agent field updates  
+
+---
+
+## 🧠 Design Decisions
+
+- Used **Jinja templates** for simplicity and speed (no frontend framework overhead)
+- Separated concerns using:
+  - Blueprints (`auth`, `fields`)
+  - Models (`User`, `Field`, `FieldHistory`)
+- Computed business logic (status) instead of storing static values
+- Lightweight architecture suitable for assessment scope without over-engineering
+
+---
+
+## 🗄️ Database Design
+
+### Users
+- id  
+- name  
+- email  
+- password  
+- role  
+
+### Fields
+- id  
+- name  
+- crop_type  
+- planting_date  
+- stage  
+- status *(computed)*  
+- assigned_agent_id  
+
+### FieldHistory
+- id  
+- field_id  
+- old_stage  
+- new_stage  
+- updated_by  
+- timestamp  
+
+---
+
+## 🌱 Seed Data
+
+On first run, the system automatically seeds:
+
+- 1 Admin user  
+- 1 Field Agent  
+- 1 Demo field assigned to the agent  
+
+> This is for testing and demonstration purposes only.
+
+---
+
+## 🚀 Possible Improvements (Future Scope)
+
+- Add charts for analytics (growth trends)  
+- Add notifications for "At Risk" fields  
+- GPS mapping for fields  
+- Multi-agent assignment per field  
+- API layer for mobile integration  
+
+---
+
+## 🏁 Summary
+
+This project focuses on:
+
+- Clean role-based architecture  
+- Real-world agricultural tracking logic  
+- Simple but scalable backend design  
+- Usable and intuitive UI
