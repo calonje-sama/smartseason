@@ -1,0 +1,20 @@
+<h2>Field History - {{ field.name }}</h2>
+
+<p>Crop: {{ field.crop_type }}</p>
+<p>Current Stage: {{ field.stage }}</p>
+
+<hr>
+
+<h3>Change History</h3>
+
+{% for h in history %}
+    <div style="border:1px solid #ddd; padding:10px; margin-bottom:8px;">
+        <b>{{ h.old_stage }}</b> → <b>{{ h.new_stage }}</b><br>
+        Updated By: {{ h.user.name }} ({{ h.user.role }}) <br>
+        Time: {{ h.timestamp }}
+    </div>
+{% endfor %}
+
+{% if history|length == 0 %}
+    <p>No history available yet.</p>
+{% endif %}

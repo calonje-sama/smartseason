@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8">
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+    <h1>SmartSeason Dashboard</h1>
+
+    <h3>Welcome, {{ user.name }} 👋</h3>
+    <p>Role: {{ user.role }}</p>
+
+    <hr>
+
+    {% if user.role == 'admin' %}
+        <h2>Admin Overview</h2>
+        <div style="text-align:right;">
+            <a href="/fields/create">
+                <button style="padding:8px 12px; cursor:pointer;">+ Create Field</button>
+            </a>
+        </div>
+        <ul>
+            <li>Total Fields: {{ total }}</li>
+            <li>Active Fields: {{ active }}</li>
+            <li>At Risk Fields: {{ risk }}</li>
+            <li>Completed Fields: {{ done }}</li>
+        </ul>
+
+        <hr>
+
+        {% for f in fields %}
+            <div style="border-radius:10px; padding:12px; margin-bottom:10px; background:#f5f5f5;">
+
+                <h3>{{ f.name }}</h3>
+
+                <p>
+                    <b>Crop:</b> {{ f.crop_type }} <br>
+                    <b>Stage:</b> {{ f.stage }} <br>
+                    <b>Status:</b> 
+                    {% if f.status == 'Active' %}
+                        <span style="color:green;">● Active</span>
+                    {% elif f.status == 'At Risk' %}
+                        <span style="color:orange;">● At Risk</span>
+                    {% else %}
+                        <span style="color:blue;">● Completed</span>
+                    {% endif %}
+                </p>
+
+                <a href="/fields/history/{{ f.id }}">
+                    <button>View History</button>
+                </a>
+
+            </div>
+        {% endfor %}
+
+    {% else %}
+        <h2>My Assigned Fields</h2>
+
+        {% for f in fields %}
+            <div style="border-radius:10px; padding:15px; margin-bottom:10px; background:#f9f9f9;">
+                
+                <b>{{ f.name }}</b> - {{ f.crop_type }} <br>
+                Stage: {{ f.stage }} <br>
+                Status: {{ f.status }}
+
+                <hr>
+
+                <!-- UPDATE FORM -->
+                <form method="POST" action="/fields/update/{{ f.id }}">
+
+                    <label>Update Stage:</label>
+
+                    <select name="stage">
+                        <option value="Planted">Planted</option>
+                        <option value="Growing">Growing</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Harvested">Harvested</option>
+                    </select>
+
+                    <button type="submit">Update</button>
+                </form>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <br><br>
+
+    <a href="/logout">
+        <button style="margin-top:20px; cursor:pointer;">Logout</button>
+    </a>
+
+</body>
+</html>

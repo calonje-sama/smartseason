@@ -1,0 +1,21 @@
+<h2>Create Field</h2>
+
+<form method="POST">
+
+    <input name="name" placeholder="Field Name"><br>
+
+    <input name="crop_type" placeholder="Crop Type"><br>
+
+    <input type="date" name="planting_date"><br>
+
+    <select name="agent_id">
+        {% for agent in agents %}
+            <option value="{{ agent.id }}">
+                {{ agent.name }} ({{ agent.email }})
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Create Field</button>
+
+</form>
